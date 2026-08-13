@@ -1,0 +1,35 @@
+<div class="container py-4">
+  <h1 class="h3 fw-bold mb-4">My Tailored Resumes</h1>
+
+  @if (loading()) {
+    <div class="text-center py-5 text-secondary">Loading&hellip;</div>
+  } @else if (!items().length) {
+    <div class="alert alert-secondary">
+      No tailored resumes yet. Open a job and click <strong>Tailor My Resume</strong>, or
+      <a routerLink="/tailor-resume">tailor one with your own job description</a>.
+    </div>
+  } @else {
+    <div class="list-group">
+      @for (item of items(); track item.id) {
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+              <div class="fw-semibold">{{ item.job_title || 'Custom job description' }}</div>
+              @if (item.company) {
+                <div class="small text-secondary">{{ item.company }}</div>
+              }
+              <div class="small text-secondary">{{ item.created_at | date: 'medium' }}</div>
+            </div>
+            <div class="d-flex gap-2">
+              @if (item.job_slug) {
+                <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/jobs', item.job_slug]">View job</a>
+              }
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="download(item)">Download .txt</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" (click)="remove(item.id)">Delete</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

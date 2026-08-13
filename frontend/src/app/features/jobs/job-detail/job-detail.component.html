@@ -1,0 +1,75 @@
+<div class="container py-4">
+  @if (loading()) {
+    <div class="text-center py-5 text-secondary">Loading…</div>
+  } @else if (notFound()) {
+    <div class="alert alert-danger">
+      Job not found. <a routerLink="/">Back to listings</a>.
+    </div>
+  } @else if (job(); as job) {
+    <a routerLink="/" class="d-inline-block mb-3 small">&larr; Back to all jobs</a>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+          <div>
+            <h1 class="h3 fw-bold mb-1">{{ job.title }}</h1>
+            <p class="text-secondary mb-0">{{ job.company }} &middot; {{ job.location || 'Location not specified' }}</p>
+          </div>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-outline-danger]="!favoriteId()"
+            [class.btn-danger]="favoriteId()"
+            (click)="toggleFavorite()"
+          >
+            {{ favoriteId() ? '♥ Saved' : '♡ Save' }}
+          </button>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          @if (job.category) {
+            <span class="badge text-bg-primary-subtle text-primary-emphasis">{{ job.category.name }}</span>
+          }
+          <span class="badge text-bg-secondary-subtle text-secondary-emphasis">{{ workModeLabel[job.work_mode] }}</span>
+          @for (skill of job.skills; track skill.id) {
+            <span class="badge text-bg-light border">{{ skill.name }}</span>
+          }
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-4">
+            <div class="small text-secondary">Experience</div>
+            <div class="fw-semibold">{{ job.experience_text }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="small text-secondary">Salary</div>
+            <div class="fw-semibold">{{ job.salary_text }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="small text-secondary">Application deadline</div>
+            <div class="fw-semibold">{{ job.deadline || 'Rolling basis' }}</div>
+          </div>
+        </div>
+
+        @if (job.description) {
+          <div class="mb-4">
+            <h6 class="fw-semibold">About this role</h6>
+            <p class="mb-0">{{ job.description }}</p>
+          </div>
+        }
+
+        @if (job.eligibility) {
+          <div class="mb-4">
+            <h6 class="fw-semibold">Eligibility</h6>
+            <p class="mb-0">{{ job.eligibility }}</p>
+          </div>
+        }
+
+        <div class="d-flex flex-wrap gap-2">
+          <a [href]="job.apply_url" target="_blank" rel="noopener" class="btn btn-primary">Apply on company site &rarr;</a>
+          <a [routerLink]="['/jobs', job.slug, 'tailor-resume']" class="btn btn-outline-primary">Tailor My Resume</a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

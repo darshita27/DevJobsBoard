@@ -1,0 +1,48 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" routerLink="/">DevJobs<span class="text-primary">Board</span></a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navMenu"
+      aria-controls="navMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Browse Jobs</a>
+        </li>
+
+        @if (auth.isAuthenticated()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/favorites" routerLinkActive="active">My Favorites</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/tailor-resume" routerLinkActive="active">Tailor Resume</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/my-tailored-resumes" routerLinkActive="active">My Tailored Resumes</a>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link text-secondary">Hi, {{ auth.currentUser()?.username }}</span>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light btn-sm" (click)="logout()">Log out</button>
+          </li>
+        } @else {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary btn-sm" routerLink="/register">Sign up</a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>

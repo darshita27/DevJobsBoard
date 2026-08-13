@@ -1,0 +1,139 @@
+<div class="container py-4" style="max-width: 900px;">
+  <a [routerLink]="jobSlug ? ['/jobs', jobSlug] : ['/']" class="d-inline-block mb-3 small">
+    &larr; {{ jobSlug ? 'Back to job' : 'Back to all jobs' }}
+  </a>
+
+  <h1 class="h3 fw-bold mb-1">Tailor My Resume</h1>
+  <p class="text-secondary mb-4">
+    Paste or upload your resume and we'll rewrite it to match the job description &mdash; ATS-friendly formatting, no fabricated experience.
+  </p>
+
+  @if (result(); as res) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+          <h2 class="h5 fw-semibold mb-0">Tailored resume</h2>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="copyToClipboard()">
+              {{ copied() ? 'Copied!' : 'Copy' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="download()">Download .txt</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" (click)="startOver()">Tailor another</button>
+          </div>
+        </div>
+
+        <pre class="p-3 bg-light border rounded small" style="white-space: pre-wrap; max-height: 500px; overflow-y: auto;">{{ res.tailored_resume }}</pre>
+
+        <div class="row g-4 mt-1">
+          @if (res.summary_of_changes.length) {
+            <div class="col-md-6">
+              <h6 class="fw-semibold">What changed</h6>
+              <ul class="small mb-0">
+                @for (item of res.summary_of_changes; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          }
+          @if (res.ats_tips.length) {
+            <div class="col-md-6">
+              <h6 class="fw-semibold">Further ATS tips</h6>
+              <ul class="small mb-0">
+                @for (tip of res.ats_tips; track tip) {
+                  <li>{{ tip }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+
+        @if (res.matched_keywords.length) {
+          <div class="mt-3">
+            <h6 class="fw-semibold">Matched keywords</h6>
+            <div class="d-flex flex-wrap gap-2">
+              @for (kw of res.matched_keywords; track kw) {
+                <span class="badge text-bg-primary-subtle text-primary-emphasis">{{ kw }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="card shadow-sm">
+      <div class="card-body">
+        @if (jobSlug) {
+          @if (loadingJob()) {
+            <div class="text-secondary small mb-3">Loading job&hellip;</div>
+          } @else if (job(); as job) {
+            <div class="alert alert-secondary py-2 mb-3">
+              Tailoring for <strong>{{ job.title }}</strong> at <strong>{{ job.company }}</strong>.
+            </div>
+          }
+        } @else {
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Job description</label>
+            <textarea
+              class="form-control"
+              rows="6"
+              placeholder="Paste the job description you're applying to..."
+              [(ngModel)]="jobDescription"
+              name="jobDescription"
+            ></textarea>
+          </div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold d-block">Your resume</label>
+          <div class="btn-group mb-2" role="group">
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="inputMode() === 'paste'"
+              [class.btn-outline-primary]="inputMode() !== 'paste'"
+              (click)="setInputMode('paste')"
+            >
+              Paste text
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-primary]="inputMode() === 'file'"
+              [class.btn-outline-primary]="inputMode() !== 'file'"
+              (click)="setInputMode('file')"
+            >
+              Upload file
+            </button>
+          </div>
+
+          @if (inputMode() === 'paste') {
+            <textarea
+              class="form-control"
+              rows="10"
+              placeholder="Paste your current resume text..."
+              [(ngModel)]="resumeText"
+              name="resumeText"
+            ></textarea>
+          } @else {
+            <input type="file" class="form-control" accept=".pdf,.docx,.txt" (change)="onFileSelected($event)" />
+            @if (resumeFileName()) {
+              <div class="form-text">Selected: {{ resumeFileName() }}</div>
+            }
+          }
+        </div>
+
+        @if (errorMsg()) {
+          <div class="alert alert-danger py-2">{{ errorMsg() }}</div>
+        }
+
+        <button type="button" class="btn btn-primary" [disabled]="!canSubmit()" (click)="submit()">
+          @if (submitting()) {
+            Tailoring&hellip;
+          } @else {
+            Tailor my resume
+          }
+        </button>
+      </div>
+    </div>
+  }
+</div>

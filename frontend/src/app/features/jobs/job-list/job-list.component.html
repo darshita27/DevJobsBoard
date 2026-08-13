@@ -1,0 +1,113 @@
+<div class="container py-4">
+  <div class="mb-4">
+    <h1 class="h3 fw-bold mb-1">Full Stack, Web & AI Developer Jobs</h1>
+    <p class="text-secondary">Browse verified developer and internship openings in India.</p>
+  </div>
+
+  <div class="row g-4">
+    <aside class="col-lg-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h6 class="card-title fw-semibold mb-3">Filters</h6>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Search</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Title, company..."
+              [(ngModel)]="search"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Category</label>
+            <select class="form-select form-select-sm" [(ngModel)]="category" (ngModelChange)="applyFilters()">
+              <option value="">All categories</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.slug">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">City</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="e.g. Bengaluru"
+              [(ngModel)]="city"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Work mode</label>
+            <select class="form-select form-select-sm" [(ngModel)]="workMode" (ngModelChange)="applyFilters()">
+              <option value="">Any</option>
+              <option value="remote">Remote</option>
+              <option value="onsite">On-site</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="unspecified">Not specified</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Experience</label>
+            <select class="form-select form-select-sm" [(ngModel)]="experience" (ngModelChange)="applyFilters()">
+              <option value="">Any experience</option>
+              @for (level of experienceLevels; track level.value) {
+                <option [value]="level.value">{{ level.label }}</option>
+              }
+            </select>
+          </div>
+
+          <button class="btn btn-primary btn-sm w-100" (click)="applyFilters()">Apply filters</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="col-lg-9">
+      @if (loading()) {
+        <div class="text-center py-5 text-secondary">Loading jobs…</div>
+      } @else if (errorMessage()) {
+        <div class="alert alert-danger">{{ errorMessage() }}</div>
+      } @else if (jobs().length === 0) {
+        <div class="alert alert-secondary">No jobs match your filters.</div>
+      } @else {
+        <p class="text-secondary small mb-3">{{ count() }} opportunities found</p>
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+          @for (job of jobs(); track job.id) {
+            <div class="col">
+              <app-job-card
+                [job]="job"
+                [showFavoriteButton]="true"
+                [isFavorited]="favoriteIdByJob().has(job.id)"
+                (favoriteToggle)="onFavoriteToggle($event)"
+              />
+            </div>
+          }
+        </div>
+
+        @if (totalPages() > 1) {
+          <nav class="mt-4" aria-label="Job pages">
+            <ul class="pagination pagination-sm justify-content-center">
+              <li class="page-item" [class.disabled]="page() === 1">
+                <button class="page-link" (click)="goToPage(page() - 1)">Previous</button>
+              </li>
+              @for (p of [].constructor(totalPages()); let i = $index; track i) {
+                <li class="page-item" [class.active]="page() === i + 1">
+                  <button class="page-link" (click)="goToPage(i + 1)">{{ i + 1 }}</button>
+                </li>
+              }
+              <li class="page-item" [class.disabled]="page() === totalPages()">
+                <button class="page-link" (click)="goToPage(page() + 1)">Next</button>
+              </li>
+            </ul>
+          </nav>
+        }
+      }
+    </main>
+  </div>
+</div>

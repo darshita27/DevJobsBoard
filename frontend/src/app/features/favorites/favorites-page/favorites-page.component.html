@@ -1,0 +1,19 @@
+<div class="container py-4">
+  <h1 class="h3 fw-bold mb-4">My Favorites</h1>
+
+  @if (loading()) {
+    <div class="text-center py-5 text-secondary">Loading…</div>
+  } @else if (favorites().length === 0) {
+    <div class="alert alert-secondary">
+      You haven't saved any jobs yet. Browse the listings and tap the heart icon to save one here.
+    </div>
+  } @else {
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+      @for (fav of favorites(); track fav.id) {
+        <div class="col">
+          <app-job-card [job]="fav.job" [showFavoriteButton]="true" [isFavorited]="true" (favoriteToggle)="remove(fav.id)" />
+        </div>
+      }
+    </div>
+  }
+</div>

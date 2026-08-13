@@ -1,0 +1,39 @@
+databases:
+  - name: devjobsboard-db
+    plan: free
+
+services:
+  - type: web
+    name: devjobsboard-api
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: devjobsboard-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://devjobsboard-web.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: devjobsboard-db
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-5
+
+  - type: static
+    name: devjobsboard-web
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist/frontend/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
