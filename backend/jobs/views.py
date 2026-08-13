@@ -1,7 +1,14 @@
+import io
+import os
+import secrets
+
+from django.core.management import call_command
 from django.db.models import Q
 from django_filters.rest_framework import CharFilter, FilterSet
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Category, Favorite, Job
 from .serializers import CategorySerializer, FavoriteSerializer, JobDetailSerializer, JobListSerializer
@@ -73,3 +80,23 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         if instance.user_id != self.request.user.id:
             raise PermissionDenied('Not your favorite.')
         instance.delete()
+
+
+class FetchJobsTriggerView(APIView):
+    """Runs the fetch_jobs command on request. Auth is a shared-secret header, not a user
+    account, so this can be called by an external scheduler (cron-job.org, GitHub Actions, ...)."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        expected = os.environ.get('FETCH_JOBS_TOKEN')
+        provided = request.headers.get('X-Fetch-Token', '')
+        if not expected or not secrets.compare_digest(provided, expected):
+            return Response({'detail': 'Forbidden.'}, status=403)
+
+        buf = io.StringIO()
+        try:
+            call_command('fetch_jobs', stdout=buf, stderr=buf)
+        except Exception as err:  # noqa: BLE001
+            return Response({'detail': f'fetch_jobs failed: {err}', 'output': buf.getvalue()}, status=500)
+        return Response({'detail': 'ok', 'output': buf.getvalue()})
